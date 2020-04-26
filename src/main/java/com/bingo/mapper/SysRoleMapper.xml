@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bingo.dao.ISysRoleDao">
+	<!-- <cache /> -->
+	<sql id="sysRoleColumn">
+		${mark}.sr_id,${mark}.name,${mark}.available
+	</sql>
+	<resultMap type="SysRole" id="sysRoleMap">
+		<id property="id" column="sr_id"/>
+		<result property="name" column="name"/>
+		<result property="available" column="available"/>
+	</resultMap>
+	<select id="findAllSysRole" resultMap="sysRoleMap">
+		select 
+		<include refid="sysRoleColumn">
+			<property name="mark" value="sys_role"/>
+		</include>
+		from sys_role
+	</select>
+	<select id="findSysRoleByUserId" resultMap="sysRoleMap">
+		SELECT
+		<include refid="sysRoleColumn">
+			<property name="mark" value="sys_role"/>
+		</include>
+		from sys_role where sr_id in
+		(SELECT sys_role_id from sys_user_role where sys_user_id=#{userId})
+	</select>
+	<insert id="insertSysRole" parameterType="SysRole" useGeneratedKeys="true" keyColumn="sr_id" flushCache="true">
+		insert into sys_role
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="name != null and name !=''">name,</if>
+			<if test="available != null">available,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="name != null and name !=''">#{name},</if>
+			<if test="available != null">#{available},</if>
+		</trim>
+	</insert>
+	<update id="updateSysRole" parameterType="SysRole" flushCache="true">
+		update sys_role
+		<set>
+			<if test="name != null and name !=''">name=#{name},</if>
+			<if test="available != null">available=#{available},</if>
+		</set>
+		where sr_id=#{id}
+	</update>
+	<delete id="deleteSysRole" parameterType="Integer" flushCache="true">
+		delete from sys_role where sr_id=#{id}
+	</delete>
+</mapper>

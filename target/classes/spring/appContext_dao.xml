@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+	<!-- 加载 dbConn.properties 数据连接配置信息 -->
+	<context:property-placeholder location="classpath:dbConn.properties"/>
+	<!-- 扫描注解包 -->
+	<context:component-scan base-package="com.bingo.dao" />
+	<!-- druid连接池 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+		<property name="driverClassName" value="${mysql.driver}" />
+		<property name="url" value="${mysql.url}" />
+		<property name="username" value="${mysql.username}" />
+		<property name="password" value="${mysql.password}" />
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="${mysql.initialSize}" />
+		<property name="minIdle" value="${mysql.minIdle}" />
+		<property name="maxActive" value="${mysql.maxActive}" />
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="${mysql.maxWait}" />
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="${mysql.timeBetweenEvictionRunsMillis}" />
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="${mysql.minEvictableIdleTimeMillis}" />
+		<property name="testWhileIdle" value="true" />
+		<!-- 这里建议配置为TRUE，防止取到的连接不可用 -->
+		<property name="testOnBorrow" value="true" />
+		<property name="testOnReturn" value="false" />
+	</bean>
+	<!-- spring和MyBatis完美整合，不需要mybatis的配置映射文件 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 数据源 -->
+		<property name="dataSource" ref="dataSource" />
+		<!-- 别名 -->
+		<property name="typeAliasesPackage" value="com.bingo.bean" />
+		<property name="configLocation" value="classpath:mybatis-config.xml" /> 
+		<!-- 扫描mapper文件 -->
+		<property name="mapperLocations" value="classpath:com/bingo/mapper/*.xml" />
+		<!-- 分页 -->
+		<property name="plugins">
+			<array>
+				<ref bean="pageHelper"/>
+			</array>
+		</property>
+	</bean>
+	<!-- 配置分页 -->
+	<bean id="pageHelper" class="com.github.pagehelper.PageHelper">
+		<property name="properties" value="helperDialect=mysql" />
+	</bean>
+	<!--指定会话工厂，如果当前上下文中只定义了一个则该属性可省去 -->
+	<!-- 指定要自动扫描接口的基础包，实现接口 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.bingo.dao" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+</beans>

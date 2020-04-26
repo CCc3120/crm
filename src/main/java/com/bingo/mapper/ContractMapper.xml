@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bingo.dao.IContractDao">
+	<!-- <cache /> -->
+	<sql id="contractColumn">
+		${mark}.coid,${mark}.coname,${mark}.acustom,${mark}.bcustom,${mark}.ccontext,${mark}.c_createtime
+	</sql>
+	<resultMap type="Contract" id="contractMap">
+		<id property="id" column="coid" />
+		<result property="title" column="coname" />
+		<result property="aname" column="acustom" />
+		<result property="bname" column="bcustom" />
+		<result property="context" column="ccontext" />
+		<result property="createTime" column="c_createtime" />
+	</resultMap>
+	<select id="findAllContract" resultMap="contractMap">
+		select
+		<include refid="contractColumn">
+			<property name="mark" value="contract" />
+		</include>
+		from contract order by contract.c_createtime desc
+	</select>
+	<select id="findContractById" resultMap="contractMap" parameterType="Integer">
+		select
+		<include refid="contractColumn">
+			<property name="mark" value="contract" />
+		</include>
+		from contract where coid=#{id}
+	</select>
+	<insert id="insertContract" parameterType="Contract" useGeneratedKeys="true" keyColumn="coid" flushCache="true">
+		insert into contract
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="title != null">coname,</if>
+			<if test="context != null">ccontext,</if>
+			<if test="aname != null">acustom,</if>
+			<if test="bname != null">bcustom,</if>
+			<if test="createTime != null">c_createtime,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="title != null">#{title},</if>
+			<if test="context != null">#{context},</if>
+			<if test="aname != null">#{aname},</if>
+			<if test="bname != null">#{bname},</if>
+			<if test="createTime != null">#{createTime},</if>
+		</trim>
+	</insert>
+	<update id="updateContract" parameterType="Contract" flushCache="true">
+		update contract 
+		<set>
+			<if test="title != null and title != ''">coname=#{title},</if>
+			<if test="aname != null">acustom=#{aname},</if>
+			<if test="bname != null">bcustom=#{bname},</if>
+			<if test="context != null">ccontext=#{context},</if>
+			<if test="createTime != null">c_createtime=#{createTime},</if>
+		</set>
+		where coid=#{id}
+	</update>
+	<delete id="deleteContract" parameterType="Integer" flushCache="true">
+		delete from contract where coid=#{id}
+	</delete>
+</mapper>

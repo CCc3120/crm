@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd" >
+	
+	<!-- <import resource="appContext_biz.xml" /> -->
+	<!-- 注解扫描器  上面的可省略-->
+	<!-- <context:annotation-config /> -->
+	<context:component-scan base-package="com.bingo.controller" />
+	<!-- 访问静态资源 -->
+	<!-- <mvc:default-servlet-handler /> -->
+	<mvc:resources location="/WEB-INF/resources/" mapping="/resources/**" />
+	<!-- 配置转换器 DefaultAnnotationHandlerMapping与AnnotationMethodHandlerAdapter 两个bean,是spring MVC为@Controllers分发请求所必须的-->
+	<mvc:annotation-driven conversion-service="conversionService" />
+	<!-- 开启aop，对类代理 -->
+	<aop:config proxy-target-class="true" />
+	<!-- 视图解析器 Controller返回的 -->
+	<!-- 国际化视图解析器。 -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+		<!-- 前缀 -->
+		<property name="prefix" value="/WEB-INF/Jsp/" />
+		<!-- 后缀 -->
+		<property name="suffix" value=".jsp" />
+	</bean>
+	<!-- 它简单实现了ViewResolver接口，它不用显式定义，直接影响逻辑视图到URL的映射。它让你不用任何映射就能通过逻辑视图名称访问资源 -->
+	<!-- <bean id="viewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView" />
+		前缀
+		<property name="prefix" value="/WEB-INF/Jsp/" />
+		后缀
+		<property name="suffix" value=".jsp" />
+	</bean> -->
+	<!-- 自定义转换器 -->
+	<!-- 转换器配置 -->
+	<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+		<property name="converters">
+			<set>
+				<bean class="com.bingo.converter.DateConverter" />
+			</set>
+		</property>
+	</bean>
+	<!-- 配置文件上传，如果没有使用文件上传可以不用配置 -->
+	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 默认编码 -->
+		<property name="defaultEncoding" value="utf-8" />
+		<!-- 文件大小最大值5MB -->
+		<property name="maxUploadSize" value="5242880" />
+		<!-- 内存中的最大值 -->
+		<property name="maxInMemorySize" value="40960" />
+		<!-- 启用是为了推迟文件解析，以便捕获文件大小异常 -->
+		<property name="resolveLazily" value="true" />
+	</bean>
+	<!-- 添加自定义异常 -->
+	<bean id="handlerExceptionResolver" class="com.bingo.exception.CustomExceptionResolver" />
+	
+ 	<!-- <bean id="mappingJacksonHttpMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+				<value>application/json;charset=UTF-8</value>
+			</list>
+		</property>
+	</bean>
+	<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<ref bean="mappingJacksonHttpMessageConverter"/>
+			</list>
+		</property>
+	</bean> -->
+</beans>

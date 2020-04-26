@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bingo.dao.IEmpDao">
+	<!-- <cache />  -->
+	<sql id="empColumn">
+		${mark}.e_id,${mark}.ename,${mark}.sex,${mark}.age,${mark}.address
+	</sql>
+	<sql id="deptColumn">
+		${mark}.de_id,${mark}.dname,${mark}.descr,${mark}.maxperson
+	</sql>
+	<resultMap type="Emp" id="empMap">
+		<id property="id" column="e_id"/>
+		<result property="name" column="ename"/>
+		<result property="sex" column="sex"/>
+		<result property="age" column="age"/>
+		<result property="address" column="address"/>
+	</resultMap>
+	<resultMap type="Emp" id="empMaps">
+		<id property="id" column="e_id"/>
+		<result property="name" column="ename"/>
+		<result property="sex" column="sex"/>
+		<result property="age" column="age"/>
+		<result property="address" column="address"/>
+		<association property="dept" column="deptno" javaType="Dept">
+			<id column="de_id" property="id"/>
+			<result column="dname" property="name"/>
+			<result column="descr" property="desc"/>
+			<result column="maxperson" property="maxPerson"/>
+		</association>
+	</resultMap>
+	<select id="findEmpByDeptNo" resultMap="empMap" parameterType="Integer">
+		select
+		<include refid="empColumn">
+			<property name="mark" value="e"/>
+		</include>
+		from emp e where e.deptno=#{deptno}
+	</select>
+	<select id="findAllEmp" resultMap="empMaps">
+		select 
+		<include refid="empColumn">
+			<property name="mark" value="e"/>
+		</include>
+		,
+		<include refid="deptColumn">
+			<property name="mark" value="d"/>
+		</include>
+		from emp e left join dept d on  e.deptno=d.de_id
+	</select>
+	<select id="findEmpById" resultMap="empMaps" parameterType="Integer">
+		select 
+		<include refid="empColumn">
+			<property name="mark" value="e"/>
+		</include>
+		,
+		<include refid="deptColumn">
+			<property name="mark" value="d"/>
+		</include>
+		from emp e left join dept d on  e.deptno=d.de_id where e.e_id=#{id}
+	</select>
+	<update id="updateEmp" parameterType="Emp" flushCache="true">
+		update emp
+		<set>
+			<if test="name != null and name != ''">ename=#{name},</if>
+			<if test="sex != null">sex=#{sex},</if>
+			<if test="age != null">age=#{age},</if>
+			<if test="address != null">address=#{address},</if>
+			deptno=#{dept.id},
+		</set>
+		where e_id=#{id}
+	</update>
+	<insert id="insertEmp" parameterType="Emp" useGeneratedKeys="true" keyColumn="e_id" flushCache="true">
+		insert into emp
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="name != null and name != ''">ename,</if>
+			<if test="sex != null">sex,</if>
+			<if test="age != null">age,</if>
+			<if test="address != null">address,</if>
+			<if test="dept != null">deptno,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="name != null and name != ''">#{name},</if>
+			<if test="sex != null">#{sex},</if>
+			<if test="age != null">#{age},</if>
+			<if test="address != null">#{address},</if>
+			<if test="dept != null">#{dept.id},</if>
+		</trim>
+	</insert>
+	<delete id="deleteEmp" parameterType="Integer" flushCache="true">
+		delete from emp where e_id=#{id}
+	</delete>
+</mapper>

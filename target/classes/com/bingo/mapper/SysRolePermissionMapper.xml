@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bingo.dao.ISysRolePermissionDao">
+	<!-- <cache /> -->
+	<sql id="sysRolePermissionColumn">
+		${mark}.id,${mark}.sys_role_id,${mark}.sys_permission_id
+	</sql>
+	<resultMap type="SysRolePermission" id="sysRolePermissionMap">
+		<id property="id" column="id"/>
+		<association property="sysRole" column="sys_role_id" javaType="SysRole">
+			<id property="id" column="sr_id"/>
+			<result property="name" column="name"/>
+			<result property="available" column="available"/>
+		</association>
+		<association property="sysPermission" column="sys_permission_id" javaType="SysPermission">
+			<id property="id" column="sp_id" />
+			<result property="name" column="name" />
+			<result property="type" column="type" />
+			<result property="url" column="url" />
+			<result property="perCode" column="percode" />
+			<result property="parentid" column="parentid" />
+			<result property="parentids" column="parentisd" />
+			<result property="sortstring" column="sortstring" />
+			<result property="available" column="available" />
+		</association>
+	</resultMap>
+	<insert id="insertSysRolePermission" parameterType="SysRolePermission" useGeneratedKeys="true" keyProperty="id" flushCache="true"> 
+		insert into sys_role_permission
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="sysRole != null">sys_role_id,</if>
+			<if test="sysPermission != null">sys_permission_id,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="sysRole != null">#{sysRole.id},</if>
+			<if test="sysPermission != null">#{sysPermission.id},</if>
+		</trim>
+	</insert>
+	<delete id="deleteSysRolePermission" parameterType="Integer" flushCache="true">
+		delete from sys_role_permission where sys_role_id=#{roleId}
+	</delete>
+</mapper>

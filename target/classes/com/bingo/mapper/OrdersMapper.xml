@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bingo.dao.IOrdersDao">
+	<!-- <cache />  -->
+	<sql id="ordersColumn">
+		${mark}.oid,${mark}.empid,${mark}.deptid,${mark}.customer,${mark}.pay,${mark}.createtime,${mark}.proid,${mark}.quantity
+	</sql>
+	<sql id="empColumn">
+		${mark}.e_id,${mark}.ename,${mark}.sex,${mark}.age,${mark}.address
+	</sql>
+	<sql id="deptColumn">
+		${mark}.de_id,${mark}.dname,${mark}.descr,${mark}.maxperson
+	</sql>
+	<sql id="custonColumn">
+		${mark}.cuid,${mark}.sex,${mark}.cname,${mark}.caddress,${mark}.birthday
+	</sql>
+	<sql id="productColumn">
+		${mark}.pid,${mark}.pname,${mark}.pdesc,${mark}.price,${mark}.stock,${mark}.pic,${mark}.discount,${mark}.cost
+	</sql>
+	<resultMap type="Orders" id="ordersMap">
+		<id property="id" column="oid"/>
+		<result property="quantity" column="quantity"/>
+		<result property="createTime" column="createtime"/>
+		<result property="pay" column="pay"/>
+		<association property="emp" column="empid" javaType="Emp">
+			<id property="id" column="e_id"/>
+			<result property="name" column="ename"/>
+			<result property="sex" column="sex"/>
+			<result property="age" column="age"/>
+			<result property="address" column="address"/>
+		</association>
+		<association property="dept" column="deptid" javaType="Dept">
+			<id property="id" column="de_id"/>
+			<result property="name" column="dname"/>
+			<result property="desc" column="descr"/>
+			<result property="maxPerson" column="maxperson"/>
+		</association>
+		<association property="product" column="proid" javaType="Product">
+			<id property="id" column="pid"/>
+			<result property="name" column="pname"/>
+			<result property="desc" column="pdesc"/>
+			<result property="price" column="price"/>
+			<result property="stock" column="stock"/>
+			<result property="pic" column="pic"/>
+			<result property="discount" column="discount"/>
+			<result property="cost" column="cost"/>
+		</association>
+		<association property="custom" column="customer" javaType="Custom">
+			<id property="id" column="cuid" />
+			<result property="sex" column="sex"/>
+			<result property="name" column="cname"/>
+			<result property="address" column="caddress"/>
+			<result property="birthday" column="birthday"/>
+		</association>
+	</resultMap>
+	<select id="findAllOrders" resultMap="ordersMap">
+		select 
+		<include refid="ordersColumn">
+			<property name="mark" value="o"/>
+		</include>
+		,
+		<include refid="empColumn">
+			<property name="mark" value="e"/>
+		</include>
+		,
+		<include refid="deptColumn">
+			<property name="mark" value="d"/>
+		</include>
+		,
+		<include refid="custonColumn">
+			<property name="mark" value="c"/>
+		</include>
+		,
+		<include refid="productColumn">
+			<property name="mark" value="p"/>
+		</include>
+		from orders o LEFT JOIN emp e on o.empid=e.e_id LEFT JOIN dept d on o.deptid=d.de_id left JOIN custom c on o.customer=c.cuid left join product p on o.proid=p.pid
+		order by o.createtime desc
+	</select>
+	<insert id="insertOrders" parameterType="Orders" useGeneratedKeys="true" keyColumn="oid" flushCache="true">
+		insert into orders
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="quantity !=null">quantity,</if>
+			<if test="pay !=null">pay,</if>
+			<if test="createTime !=null">createtime,</if>
+			<if test="emp !=null">empid,</if>
+			<if test="dept !=null">deptid,</if>
+			<if test="custom !=null">customer,</if>
+			<if test="product !=null">proid,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="quantity !=null">#{quantity},</if>
+			<if test="pay !=null">#{pay},</if>
+			<if test="createTime !=null">#{createTime},</if>
+			<if test="emp !=null">#{emp.id},</if>
+			<if test="dept !=null">#{dept.id},</if>
+			<if test="custom !=null">#{custom.id},</if>
+			<if test="product !=null">#{product.id},</if>
+		</trim>
+	</insert>
+	<delete id="deleteOrders" parameterType="Integer" flushCache="true">
+		delete from orders where oid=#{id}
+	</delete>
+	<select id="findOrdersById" parameterType="Integer" resultMap="ordersMap">
+		select 
+		<include refid="ordersColumn">
+			<property name="mark" value="o"/>
+		</include>
+		,
+		<include refid="empColumn">
+			<property name="mark" value="e"/>
+		</include>
+		,
+		<include refid="deptColumn">
+			<property name="mark" value="d"/>
+		</include>
+		,
+		<include refid="custonColumn">
+			<property name="mark" value="c"/>
+		</include>
+		,
+		<include refid="productColumn">
+			<property name="mark" value="p"/>
+		</include>
+		from orders o LEFT JOIN emp e on o.empid=e.e_id LEFT JOIN dept d on o.deptid=d.de_id left JOIN custom c on o.customer=c.cuid left join product p on o.proid=p.pid
+		where o.oid=#{id}
+	</select>
+	<update id="updateOrders" parameterType="Orders" flushCache="true">
+		update orders
+		<set>
+			<if test="quantity !=null">quantity=#{quantity},</if>
+			<if test="pay !=null">pay=#{pay},</if>
+			<if test="createTime !=null">createtime=#{createTime},</if>
+			<if test="emp !=null">empid=#{emp.id},</if>
+			<if test="dept !=null">deptid=#{dept.id},</if>
+			<if test="custom !=null">customer=#{custom.id},</if>
+			<if test="product !=null">proid=#{product.id},</if>
+		</set>
+		where oid=#{id}
+	</update>
+</mapper>

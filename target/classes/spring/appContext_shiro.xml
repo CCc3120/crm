@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd">
+
+	<import resource="appContext_biz.xml" />
+	<!-- Shiro 的Web过滤器 -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager" />
+		<!-- loginUrl认证提交地址，如果没有认证将会请求此地址进行认证，请求此地址将由formAuthenticationFilter进行表单认证 -->
+		<property name="loginUrl" value="/user/userlogin" />
+		<!-- 认证成功统一跳转到first.action，建议不配置，shiro认证成功自动到上一个请求路径 -->
+		<property name="successUrl" value="/user/first" />
+		<!-- 没有权限 -->
+		<property name="unauthorizedUrl" value="/refuse.jsp" />
+		<!-- 自定义的过滤器 -->
+		<property name="filters">
+			<map>
+				<entry key="authc" value-ref="formAuthenticationFilter"></entry>
+			</map>
+		</property>
+		<property name="filterChainDefinitions">
+			<value>
+				<!-- 退出拦截，请求logout执行退出操作 -->
+				/user/userexit = logout
+				<!-- 验证码 -->
+				/user/validateCode = anon
+				<!-- 静态资源 -->
+				/resources/** = anon
+				<!-- 首页 -->
+				/index.jsp = anon
+				<!-- 无权访问页面 -->
+				<!-- /refuse.jsp = anon -->
+				<!-- 错误页面 -->
+				/error.jsp = anon
+				
+				/user/userlogin = authc
+				<!-- user表示身份认证通过或通过记住我认证通过的可以访问 -->
+				<!-- /fruit/fruitlist= user  -->
+				<!-- 所有的连接 需要通过认证之后 才能访问 -->
+				/** = authc
+			</value>
+		</property>
+	</bean>
+	<!-- 开启shiro注解支持 -->
+	<bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+		<property name="securityManager" ref="securityManager"/>
+	</bean>
+	<!-- 自定义表单验证 -->
+	<bean id="formAuthenticationFilter" class="com.bingo.filter.MyFormAuthenticationFilter">
+		<!-- 表单中账号的input名称 -->
+		<property name="usernameParam" value="username" />
+		<!-- 表单中密码的input名称 -->
+		<property name="passwordParam" value="password" />
+		<!-- 从表单中获取的值 -->
+		<property name="rememberMeParam" value="rememberMe" />
+	</bean>
+	<!-- 安全管理器 -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="userRealm" />
+		<!-- Session管理器 -->
+		<property name="sessionManager" ref="sessionManager" />
+		<!-- rememberMe -->
+		<property name="rememberMeManager" ref="remberme" />
+		<!-- 配置第三方缓存管理器 -->
+		<property name="cacheManager" ref="shiroCacheManager" />
+	</bean>
+	<!-- 自定义 realm 从数据库中获取 认证信息 和授权信息 -->
+	<bean id="userRealm" class="com.bingo.shiro.CustomRealm" />
+	<!-- session管理器 -->
+	<!-- 会话管理器 -->
+	<bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+		<!-- session的失效时长，单位毫秒 -->
+		<property name="globalSessionTimeout" value="600000" />
+		<!-- 删除失效的session -->
+		<property name="deleteInvalidSessions" value="true" />
+	</bean>
+	<!-- rememberMe -->
+	<bean id="remberme" class="org.apache.shiro.web.mgt.CookieRememberMeManager">
+		<property name="cookie" ref="rememberMeCookie" />
+	</bean>
+	<!-- Cookie设置 -->
+	<bean id="rememberMeCookie" class="org.apache.shiro.web.servlet.SimpleCookie"> 
+	    <!-- 设置Cookie的名字 -->
+		<constructor-arg value="rememberMe" />
+		<!-- 记住我cookie生效时间30天 -->
+		<property name="maxAge" value="10" />
+	</bean>
+	<!-- 缓存配置 -->
+	<bean id="shiroCacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+		<property name="cacheManagerConfigFile" value="classpath:shiro-ehcache.xml" />
+	</bean>
+	<!-- <bean id="cacheManagerFactoryBean" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+		<property name="configLocation" value="classpath:shiro-ehcache.xml" />
+		如果有多个ehcacheManager要在bean加上p:shared="true"
+		<property name="shared" value="true" />
+	</bean>
+	spring 封装ehcache缓存管理器
+	<bean id="springCacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+		<property name="cacheManager" ref="cacheManagerFactoryBean" />
+	</bean>
+	激活spring 缓存注解
+	<cache:annotation-driven cache-manager="springCacheManager" /> -->
+</beans>

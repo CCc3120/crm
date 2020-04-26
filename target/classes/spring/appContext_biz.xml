@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
+	<!-- <import resource="appContext_redis.xml"/> -->
+	<import resource="appContext_dao.xml" />
+	<!-- 扫描注解包 -->
+	<context:component-scan base-package="com.bingo.biz" />
+	<!-- 声明式事物控制开始 -->
+	<!-- 定义数据源事物管理器 org.springframework.jdbc.datasource.DataSourceTransactionManager 只适合jdbc和没有mybatis -->
+	<!-- 定义数据源事物管理器 org.springframework.orm.hibernate4.HibernateTransactionManager 适合hibernate -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<!-- 声明事物控制通知 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<!-- 增强(事务)的属性的配置 -->
+		<tx:attributes>
+			<!-- isolation:DEFAULT :事务的隔离级别. propagation :事务的传播行为. read-only :false.不是只读 
+				timeout :-1 no-rollback-for :发生哪些异常不回滚 rollback-for :发生哪些异常回滚事务 -->
+			<tx:method name="insert*" isolation="DEFAULT" propagation="REQUIRED" read-only="false" timeout="3" />
+			<tx:method name="update*" isolation="DEFAULT" propagation="REQUIRED" read-only="false" timeout="3" />
+			<tx:method name="delete*" isolation="DEFAULT" propagation="REQUIRED" read-only="false" timeout="3" />
+			<tx:method name="find*" read-only="true" timeout="3" />
+		</tx:attributes>
+	</tx:advice>
+	<!-- 配置事物的 aop根节点 -->
+	<aop:config>
+		<!-- 定义切点:哪些类的哪些方法应用增强 within指定哪些类 -->
+		<aop:pointcut expression="within(com.bingo.biz.impl..*)" id="txPointCut" />
+		<!-- 定义切面 -->
+		<!-- <aop:aspect></aop:aspect> -->
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointCut" />
+	</aop:config>
+</beans>

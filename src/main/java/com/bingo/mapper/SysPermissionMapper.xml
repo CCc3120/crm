@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bingo.dao.ISysPermissionDao">
+	<!-- <cache /> -->
+	<sql id="sysPermissionColumn">
+		${mark}.sp_id,${mark}.name,${mark}.type,${mark}.url,${mark}.percode,${mark}.parentid,${mark}.parentisd,${mark}.sortstring,${mark}.available
+	</sql>
+	<resultMap type="SysPermission" id="sysPermissionMap">
+		<id property="id" column="sp_id" />
+		<result property="name" column="name" />
+		<result property="type" column="type" />
+		<result property="url" column="url" />
+		<result property="perCode" column="percode" />
+		<result property="parentid" column="parentid" />
+		<result property="parentids" column="parentisd" />
+		<result property="sortstring" column="sortstring" />
+		<result property="available" column="available" />
+	</resultMap>
+	<select id="findAllPermission" resultMap="sysPermissionMap">
+		select 
+		<include refid="sysPermissionColumn">
+			<property name="mark" value="sys_permission" />
+		</include>
+		from sys_permission
+	</select>
+	<insert id="insertSysPermission" parameterType="SysPermission" useGeneratedKeys="true" keyColumn="sp_id" flushCache="true">
+		insert into sys_permission
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="name != null">name,</if>
+			<if test="type != null">type,</if>
+			<if test="url != null">url,</if>
+			<if test="perCode != null">percode,</if>
+			<if test="parentid != null">parentid,</if>
+			<if test="parentids != null">parentids,</if>
+			<if test="sortstring != null">sortstring,</if>
+			<if test="available != null">available,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="name != null">#{name},</if>
+			<if test="type != null">#{type},</if>
+			<if test="url != null">#{url},</if>
+			<if test="perCode != null">#{perCode},</if>
+			<if test="parentid != null">#{parentid},</if>
+			<if test="parentids != null">#{parentids},</if>
+			<if test="sortstring != null">#{sortstring},</if>
+			<if test="available != null">#{available},</if>
+		</trim>
+	</insert>
+	<select id="findSysMenusBypid" parameterType="Integer" resultMap="sysPermissionMap">
+		select 
+		<include refid="sysPermissionColumn">
+			<property name="mark" value="sys_permission" />
+		</include>
+		from sys_permission where type='permission' and parentid=#{parentisd}
+	</select>
+	<select id="findSysPermissionById" parameterType="Integer" resultMap="sysPermissionMap">
+		select 
+		<include refid="sysPermissionColumn">
+			<property name="mark" value="sys_permission" />
+		</include>
+		from sys_permission where sp_id=#{id}
+	</select>
+	<select id="findUserMenus" parameterType="Integer" resultMap="sysPermissionMap">
+		SELECT 
+		<include refid="sysPermissionColumn">
+			<property name="mark" value="sys_permission" />
+		</include>
+		FROM sys_permission WHERE TYPE = 'menu' AND sp_id IN
+		(SELECT sys_permission_id FROM sys_role_permission WHERE sys_role_id IN
+		(SELECT sys_role_id FROM sys_user_role WHERE sys_user_id = #{id}))
+	</select>
+	<select id="findUserPermission" parameterType="Integer" resultMap="sysPermissionMap">
+		SELECT 
+		<include refid="sysPermissionColumn">
+			<property name="mark" value="sys_permission" />
+		</include> 
+		FROM sys_permission WHERE TYPE = 'permission' AND sp_id IN
+		(SELECT sys_permission_id FROM sys_role_permission WHERE sys_role_id IN
+		(SELECT sys_role_id FROM sys_user_role WHERE sys_user_id =#{id}))
+	</select> 
+	<select id="findAllMenus" resultMap="sysPermissionMap">
+		select
+		<include refid="sysPermissionColumn">
+			<property name="mark" value="sys_permission" />
+		</include>
+		from  sys_permission where TYPE = 'menu' and parentid=0
+	</select>
+	<select id="findMenusByRoleId" parameterType="Integer" resultMap="sysPermissionMap">
+		select 
+		<include refid="sysPermissionColumn">
+			<property name="mark" value="sys_permission" />
+		</include>
+		FROM sys_permission where sp_id in(select sys_permission_id FROM sys_role_permission  where sys_role_id=#{id})
+	</select>
+</mapper>

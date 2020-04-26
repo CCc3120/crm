@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bingo.dao.IServeDao">
+	<sql id="empColumn">
+		${mark}.e_id,${mark}.ename,${mark}.sex,${mark}.age,${mark}.address
+	</sql>
+	<sql id="deptColumn">
+		${mark}.de_id,${mark}.dname,${mark}.descr,${mark}.maxperson
+	</sql>
+	<sql id="custonColumn">
+		${mark}.cuid,${mark}.sex,${mark}.cname,${mark}.caddress,${mark}.birthday
+	</sql>
+	<sql id="severColumn">
+		${mark}.se_id,${mark}.se_content,${mark}.se_createtime,${mark}.se_distributiontime,${mark}.se_endtime,${mark}.se_evaluation,${mark}.se_stauts,${mark}.se_cusid,${mark}.se_empid,${mark}.se_deptid
+	</sql>
+	<resultMap type="Serve" id="serveMap">
+		<id property="id" column="se_id"/>
+		<result property="content" column="se_content"/>
+		<result property="createTime" column="se_createtime"/>
+		<result property="distributionTime" column="se_distributiontime"/>
+		<result property="endTime" column="se_endtime"/>
+		<result property="evaluation" column="se_evaluation"/>
+		<result property="stauts" column="se_stauts"/>
+		<association property="custom" column="se_cusid" javaType="Custom">
+			<id property="id" column="cuid" />
+			<result property="sex" column="sex"/>
+			<result property="name" column="cname"/>
+			<result property="address" column="caddress"/>
+			<result property="birthday" column="birthday"/>
+		</association>
+		<association property="emp" column="se_empid" javaType="Emp">
+			<id property="id" column="e_id"/>
+			<result property="name" column="ename"/>
+			<result property="sex" column="sex"/>
+			<result property="age" column="age"/>
+			<result property="address" column="address"/>
+		</association>
+		<association property="dept" column="se_deptid" javaType="Dept">
+			<id property="id" column="de_id"/>
+			<result property="name" column="dname"/>
+			<result property="desc" column="descr"/>
+			<result property="maxPerson" column="maxperson"/>
+		</association>
+	</resultMap>
+	<select id="findServeById" parameterType="Integer" resultMap="serveMap">
+		select
+		<include refid="severColumn">
+			<property name="mark" value="s"/>
+		</include>
+		,
+		<include refid="empColumn">
+			<property name="mark" value="e"/>
+		</include>
+		,
+		<include refid="deptColumn">
+			<property name="mark" value="d"/>
+		</include>
+		,
+		<include refid="custonColumn">
+			<property name="mark" value="c"/>
+		</include>
+		from serve s left join emp e on s.se_empid=e.e_id left join dept d on s.se_deptid=d.de_id left join custom c on s.se_cusid=c.cuid where s.se_id=#{id}
+	</select>
+	<select id="findAllServe" resultMap="serveMap">
+		select
+		<include refid="severColumn">
+			<property name="mark" value="s"/>
+		</include>
+		,
+		<include refid="empColumn">
+			<property name="mark" value="e"/>
+		</include>
+		,
+		<include refid="deptColumn">
+			<property name="mark" value="d"/>
+		</include>
+		,
+		<include refid="custonColumn">
+			<property name="mark" value="c"/>
+		</include>
+		from serve s left join emp e on s.se_empid=e.e_id left join dept d on s.se_deptid=d.de_id left join custom c on s.se_cusid=c.cuid 
+		<where>
+			<if test="stauts != null">and s.se_stauts=#{stauts}</if>
+		</where>
+	</select>
+	<insert id="insertServe" parameterType="Serve" useGeneratedKeys="true" keyColumn="se_id">
+		insert into serve
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="content != null">se_content,</if>
+			<if test="createTime != null">se_createtime,</if>
+			<if test="distributionTime != null">se_distributiontime,</if>
+			<if test="endTime != null">se_endtime,</if>
+			<if test="evaluation != null">se_evaluation,</if>
+			<if test="stauts != null">se_stauts,</if>
+			<if test="custom != null">se_cusid,</if>
+			<if test="emp != null">se_empid,</if>
+			<if test="dept != null">se_deptid,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="content != null">#{content},</if>
+			<if test="createTime != null">#{createTime},</if>
+			<if test="distributionTime != null">#{distributionTime},</if>
+			<if test="endTime != null">#{endTime},</if>
+			<if test="evaluation != null">#{evaluation},</if>
+			<if test="stauts != null">#{stauts},</if>
+			<if test="custom != null">#{custom.id},</if>
+			<if test="emp != null">#{emp.id},</if>
+			<if test="dept != null">#{dept.id},</if>
+		</trim>
+	</insert>
+	<update id="updateServe" parameterType="Serve">
+		update serve
+		<set>
+			<if test="content != null">se_content=#{content},</if>
+			<if test="createTime != null">se_createtime=#{createTime},</if>
+			<if test="distributionTime != null">se_distributiontime=#{distributionTime},</if>
+			<if test="endTime != null">se_endtime=#{endTime},</if>
+			<if test="evaluation != null">se_evaluation=#{evaluation},</if>
+			<if test="stauts != null">se_stauts=#{stauts},</if>
+			<if test="custom != null">se_cusid=#{custom.id},</if>
+			<if test="emp != null">se_empid=#{emp.id},</if>
+			<if test="dept != null">se_deptid=#{dept.id},</if>
+		</set>
+		where se_id=#{id}
+	</update>
+</mapper>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bingo.dao.ISysUserDao">
+	<!-- <cache /> -->
+	<sql id="sysUserColumn">
+			${mark}.su_id,${mark}.realname,${mark}.usercode,${mark}.password,${mark}.salt,${mark}.locked
+	</sql>
+	<resultMap type="SysUser" id="sysUserMap">
+		<id property="id" column="su_id" />
+		<result property="realName" column="realname" />
+		<result property="userCode" column="usercode" />
+		<result property="password" column="password" />
+		<result property="salt" column="salt" />
+		<result property="locked" column="locked" />
+	</resultMap>
+	<select id="findAllUser" resultMap="sysUserMap">
+		select 
+		<include refid="sysUserColumn">
+			<property name="mark" value="sys_user" />
+		</include>
+		from sys_user 
+	</select>
+	<select id="findUserByUserCode" resultMap="sysUserMap" parameterType="String">
+		select 
+		<include refid="sysUserColumn">
+			<property name="mark" value="sys_user" />
+		</include>
+		from sys_user where usercode=#{userCode}
+	</select>
+	<insert id="insertUser" parameterType="SysUser" useGeneratedKeys="true" keyColumn="su_id" flushCache="true">
+		insert into sys_user 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="realName != null">realname,</if>
+			<if test="userCode != null">usercode,</if>
+			<if test="password != null">password,</if>
+			<if test="salt != null">salt,</if>
+			<if test="locked != null">locked,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="realName != null">#{realName},</if>
+			<if test="userCode != null">#{userCode},</if>
+			<if test="password != null">#{password},</if>
+			<if test="salt != null">#{salt},</if>
+			<if test="locked != null">#{locked},</if>
+		</trim>
+	</insert>
+	<delete id="deleteUser" parameterType="Integer" flushCache="true">
+		delete from sys_user where su_id=#{id}
+	</delete>
+	<update id="updateUser" parameterType="SysUser" flushCache="true">
+		update sys_user
+		<set>
+			<if test="realName != null">realname=#{realName},</if>
+			<if test="userCode != null">usercode=#{userCode},</if>
+			<if test="password != null">password=#{password},</if>
+			<if test="salt != null">salt=#{salt},</if>
+			<if test="locked != null">locked=#{locked},</if>
+		</set>
+		where su_id=#{id}
+	</update>
+	
+	<!-- <select id="findUserMenus" parameterType="Integer" resultType="SysPermission">
+		SELECT * FROM sys_permission WHERE TYPE = 'menu' AND id IN
+		(SELECT sys_permission_id FROM sys_role_permission WHERE sys_role_id IN
+		(SELECT sys_role_id FROM sys_user_role WHERE sys_user_id = #{id}))
+	</select>
+	<select id="findUserPermission" parameterType="Integer" resultType="SysPermission">
+		SELECT * FROM sys_permission WHERE TYPE = 'permission' AND id IN
+		(SELECT sys_permission_id FROM sys_role_permission WHERE sys_role_id IN
+		(SELECT sys_role_id FROM sys_user_role WHERE sys_user_id =#{id}))
+	</select> -->
+</mapper>

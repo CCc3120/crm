@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bingo.dao.IDeptDao">
+	<!-- <cache /> -->
+	<sql id="deptColumn">
+		${mark}.de_id,${mark}.dname,${mark}.descr,${mark}.maxperson
+	</sql>
+	<sql id="empColumn">
+		${mark}.e_id,${mark}.ename,${mark}.sex,${mark}.age,${mark}.address
+	</sql>
+	<resultMap type="Dept" id="deptMap">
+		<id column="de_id" property="id"/>
+		<result column="dname" property="name"/>
+		<result column="descr" property="desc"/>
+		<result column="maxPerson" property="maxPerson"/>
+	</resultMap>
+	<resultMap type="Emp" id="empMap">
+		<id property="id" column="e_id"/>
+		<result property="ename" column="name"/>
+		<result property="sex" column="sex"/>
+		<result property="age" column="age"/>
+		<result property="address" column="address"/>
+	</resultMap>
+	<resultMap type="Dept" id="deptMaps">
+		<id column="de_id" property="id"/>
+		<result column="dname" property="name"/>
+		<result column="descr" property="desc"/>
+		<result column="maxPerson" property="maxPerson"/>
+		<collection property="elist" column="de_id" select="findDeptEmp" />
+	</resultMap>
+	<select id="findAllDept" resultMap="deptMap">
+		select 
+		<include refid="deptColumn">
+			<property name="mark" value="dept"/>
+		</include>
+		from dept
+	</select>
+	<select id="findDeptEmp" resultMap="empMap">
+		select 
+		<include refid="empColumn">
+			<property name="mark" value="e"/>
+		</include>
+		from emp e where e.deptno=#{de_id}
+	</select>
+	<select id="findDeptById" parameterType="Integer" resultMap="deptMap">
+		select 
+		<include refid="deptColumn">
+			<property name="mark" value="dept"/>
+		</include>
+		from dept where de_id=#{id}
+	</select>
+	<insert id="insertDept" parameterType="Dept" useGeneratedKeys="true" keyColumn="de_id" flushCache="true">
+		insert into dept
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="name != null and name != ''">dname,</if>
+			<if test="desc != null">descr,</if>
+			<if test="maxPerson != null">maxPerson,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="name != null and name != ''">#{name},</if>
+			<if test="desc != null">#{desc},</if>
+			<if test="maxPerson != null">#{maxPerson},</if>
+		</trim>
+	</insert>
+	<delete id="deleteDept" parameterType="Integer" flushCache="true">
+		delete from dept where de_id=#{id}
+	</delete>
+	<update id="updateDept" parameterType="Dept" flushCache="true">
+		update dept
+		<set>
+			<if test="name != null and name != ''">dname=#{name},</if>
+			<if test="desc != null">descr=#{desc},</if>
+			<if test="maxPerson != null">maxperson=#{maxPerson},</if>
+		</set>
+		where de_id=#{id}
+	</update>
+</mapper>

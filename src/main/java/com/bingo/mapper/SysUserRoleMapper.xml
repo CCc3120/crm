@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bingo.dao.ISysUserRoleDao">
+	<!-- <cache /> -->
+	<sql id="sysUserRoleColumn">
+		${mark}.id,${mark}.sys_user_id,${mark}.sys_role_id
+	</sql>
+	<resultMap type="SysUserRole" id="sysUserRoleMap">
+		<id property="id" column="id"/>
+		<association property="sysUser" column="sys_user_id" javaType="SysUser">
+			<id property="id" column="su_id" />
+			<result property="realName" column="realname" />
+			<result property="userCode" column="usercode" />
+			<result property="password" column="password" />
+			<result property="salt" column="salt" />
+			<result property="locked" column="locked" />
+		</association>
+		<association property="sysRole" column="sys_role_id" javaType="SysRole">
+			<id property="id" column="sr_id"/>
+			<result property="name" column="name"/>
+			<result property="available" column="available"/>
+		</association>
+	</resultMap>
+	<insert id="insertSysUserRole" parameterType="SysUserRole" useGeneratedKeys="true" keyProperty="id" flushCache="true"> 
+		insert into sys_user_role
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="sysUser != null">sys_user_id,</if>
+			<if test="sysRole != null">sys_role_id,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="sysUser != null">#{sysUser.id},</if>
+			<if test="sysRole != null">#{sysRole.id},</if>
+		</trim>
+	</insert>
+	<delete id="deleteSysUserRole" parameterType="Integer" flushCache="true">
+		delete from sys_user_role where sys_user_id=#{userId}
+	</delete>
+</mapper>

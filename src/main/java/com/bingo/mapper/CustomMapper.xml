@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bingo.dao.ICustomDao">
+	<!-- <cache />  -->
+	<sql id="custonColumn">
+		${mark}.cuid,${mark}.sex,${mark}.cname,${mark}.caddress,${mark}.birthday
+	</sql>
+	<resultMap type="Custom" id="customMap">
+		<id property="id" column="cuid" />
+		<result property="sex" column="sex" />
+		<result property="name" column="cname" />
+		<result property="address" column="caddress" />
+		<result property="birthday" column="birthday" />
+	</resultMap>
+	<select id="findAllCustom" resultMap="customMap">
+		select 
+		<include refid="custonColumn">
+			<property name="mark" value="custom"/>
+		</include>
+		from custom
+	</select>
+	<insert id="insertCustom" parameterType="Custom" useGeneratedKeys="true" keyColumn="cuid" flushCache="true">
+		insert into custom
+		<trim suffix=")" prefix="(" suffixOverrides=",">
+			<if test="sex !=null">sex,</if>
+			<if test="name !=null">cname,</if>
+			<if test="address !=null">caddress,</if>
+			<if test="birthday !=null">birthday,</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="sex !=null">#{sex},</if>
+			<if test="name !=null">#{name},</if>
+			<if test="address !=null">#{address},</if>
+			<if test="birthday !=null">#{birthday},</if>
+		</trim>
+	</insert>
+	<update id="updateCustom" parameterType="Custom" flushCache="true">
+		update custom
+		<set>
+			<if test="sex !=null">sex=#{sex},</if>
+			<if test="name !=null">cname=#{name},</if>
+			<if test="address !=null">caddress=#{address},</if>
+			<if test="birthday !=null">birthday=#{birthday},</if>
+		</set>
+		where cuid=#{id}
+	</update>
+	<delete id="deleteCustom" parameterType="Integer" flushCache="true">
+		delete from custom where cuid=#{id}
+	</delete>
+</mapper>
